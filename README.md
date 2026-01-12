@@ -1,100 +1,306 @@
-## Freenove Tank Robot Kit for Raspberry Pi
+<div align="center">
 
-<img src='Picture/icon.png' width='70%'/>
+# Freenove Tank Robot Kit for Raspberry Pi
 
-## PCB Version
+[![License: CC BY-NC-SA 3.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%203.0-lightgrey.svg?style=for-the-badge)](https://creativecommons.org/licenses/by-nc-sa/3.0/)
+[![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-3%20|%204%20|%205-C51A4A?style=for-the-badge&logo=raspberrypi&logoColor=white)](https://www.raspberrypi.org/)
+[![Python](https://img.shields.io/badge/Python-3.x-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20|%20macOS%20|%20Linux-blue?style=for-the-badge)]()
 
-| PCB Version | PCB Picture |
-|-|-|
-| V1.0 | <img src='Picture/V1.0.jpg' width='45%' alt='V1.0'/> |
-| V2.0 | <img src='Picture/V2.0.jpg' width='45%' alt='V2.0'/> |
+<img src="Picture/icon.png" width="400" alt="Freenove Tank Robot">
 
-### Download
+**A powerful robotics platform with gripper arm, camera streaming, and autonomous modes**
 
-* **Use command in console**
+[Tutorial](./Tutorial.md) · [Protocol](./Communication%20Protocol.md) · [Report Bug](mailto:support@freenove.com) · [Request Feature](mailto:support@freenove.com)
 
-    Run following command to download all the files in this repository.
+</div>
 
-    `git clone --depth 1 https://github.com/Freenove/Freenove_Tank_Robot_Kit_for_Raspberry_Pi.git`
+---
 
-* **Manually download in browser**
+## Features
 
-    Click the green "Clone or download" button, then click "Download ZIP" button in the pop-up window.
-    Do NOT click the "Open in Desktop" button, it will lead you to install Github software.
+| | Feature | Description |
+|:---:|---|---|
+| **Remote Control** | Desktop & mobile apps with live video streaming |
+| **Gripper Arm** | 2-axis servo arm for picking and placing objects |
+| **Obstacle Avoidance** | Ultrasonic sensor for autonomous navigation |
+| **Line Following** | 3-channel infrared tracking for path following |
+| **RGB LEDs** | 4 programmable WS2812 LEDs with multiple modes |
+| **Ball Tracking** | Computer vision for colored ball detection |
 
-> If you meet any difficulties, please contact our support team for help.
+---
 
-### Differences between PCB versions
-| Function | V1.0 | V2.0 |
-|-|-|-|
-| Servo | GPIO7 (Servo0), GPIO8 (Servo1) | GPIO12 (Servo0), GPIO13 (Servo1) |
-| Infrared | GPIO16 (IR01), GPIO20 (IR02), GPIO21 (IR03) | GPIO16 (IR01), GPIO26 (IR02), GPIO21 (IR03) |
-| Ultrasonic | GPIO27 (Trig), GPIO22 (Echo) | GPIO27 (Trig), GPIO22 (Echo) |
-| LedPixel | GPIO18 | GPIO10 (SPI) |
-| Motor | GPIO23 (M1+), GPIO24 (M1-), GPIO6 (M2+), GPIO5 (M2-) | GPIO23 (M1+), GPIO24 (M1-), GPIO6 (M2+), GPIO5 (M2-) |
+## Architecture
 
-### Note:
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#64748b'}}}%%
+flowchart LR
+    classDef client fill:#6366f1,stroke:#4f46e5,stroke-width:2px,color:#ffffff
+    classDef network fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#ffffff
+    classDef server fill:#10b981,stroke:#059669,stroke-width:2px,color:#ffffff
+    classDef hardware fill:#06b6d4,stroke:#0891b2,stroke-width:2px,color:#ffffff
 
- 1. For PCB V1.0, if you are using a Raspberry Pi 4, the code will automatically use the rpi_ws281x library to drive the LED. If you are using a Raspberry Pi 5, the LED cannot be used because the rpi_ws281x library is not supported on the Raspberry Pi 5.
- 2. For PCB V1.0, if you are using a Raspberry Pi 4, the code will automatically use the pigpio library to drive the servos. If you are using a Raspberry Pi 5, the code will automatically use the gpiozero library to drive the servos.
- 3. For PCB V2.0, hardware SPI is used to drive the LED, and hardware PWM is used to control the servos.
- 4. In the Raspberry Pi 5, the pigpio library cannot be used, and some functions of the rpi library are also not available in the bookworm system. Therefore, only the gpiozero library can be used to drive the servos, which may result in imperfect servo performance, occasionally causing jitter.
+    subgraph Client["Client Apps"]
+        DESKTOP[Desktop App<br/>PyQt5]:::client
+        MOBILE[Mobile App<br/>Android/iOS]:::client
+    end
 
-### Recommendation:
+    subgraph Network["TCP/IP"]
+        CMD[Port 5003<br/>Commands]:::network
+        VIDEO[Port 8003<br/>Video]:::network
+    end
 
- 1. If your PCB version is V1.0, we recommend using it with a Raspberry Pi 4 for better performance. Using a Raspberry Pi 5 is also possible, but the performance will be slightly worse.
- 2. If your PCB version is V2.0, we recommend using it with a Raspberry Pi 5 for better performance. Using a Raspberry Pi 4 is also possible, and the performance will be similar to that of the Raspberry Pi 5.
+    subgraph Server["Raspberry Pi"]
+        MAIN[Server<br/>main.py]:::server
+    end
 
-### Support
+    subgraph Hardware["Hardware"]
+        MOTOR[DC Motors]:::hardware
+        SERVO[Servo Arm]:::hardware
+        LED[RGB LEDs]:::hardware
+        CAM[Camera]:::hardware
+        SONIC[Ultrasonic]:::hardware
+        IR[Infrared]:::hardware
+    end
 
-Freenove provides free and quick customer support. Including but not limited to:
+    DESKTOP --> CMD
+    MOBILE --> CMD
+    CMD --> MAIN
+    MAIN --> MOTOR
+    MAIN --> SERVO
+    MAIN --> LED
+    MAIN --> SONIC
+    MAIN --> IR
+    CAM --> VIDEO
+    VIDEO --> DESKTOP
+    VIDEO --> MOBILE
+```
 
-* Quality problems of products
-* Using problems of products
-* Questions of learning and creation
-* Opinions and suggestions
-* Ideas and thoughts
+---
 
-Please send an email to:
+## Quick Start
 
-[support@freenove.com](mailto:support@freenove.com)
+### 1. Clone the Repository
 
-We will reply to you within one working day.
+```bash
+git clone --depth 1 https://github.com/Freenove/Freenove_Tank_Robot_Kit_for_Raspberry_Pi.git
+cd Freenove_Tank_Robot_Kit_for_Raspberry_Pi
+```
 
-### Purchase
+### 2. Setup Raspberry Pi
 
-Please visit the following page to purchase our products:
+```bash
+cd Code
+sudo python3 setup.py
+```
 
-http://store.freenove.com
+> Select your camera model when prompted (OV5647 or IMX219)
 
-Business customers please contact us through the following email address:
+### 3. Start the Server
 
-[sale@freenove.com](mailto:sale@freenove.com)
+```bash
+cd Code/Server
+python3 main.py
+```
 
-### Copyright
+### 4. Run the Client
 
-All the files in this repository are released under [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License](http://creativecommons.org/licenses/by-nc-sa/3.0/).
+**Windows/macOS/Linux:**
+```bash
+cd Code/Client
+python3 Main.py
+```
 
-![markdown](https://i-blog.csdnimg.cn/img_convert/7d756cd74076aab6d9bc50a43fd4adbf.png)
+**Mobile:** Search "Freenove" in App Store or Google Play
 
-This means you can use them on your own derived works, in part or completely. But NOT for the purpose of commercial use.
-You can find a copy of the license in this repository.
+---
 
-Freenove brand and logo are copyright of Freenove Creative Technology Co., Ltd. Can't be used without formal permission.
+## Robot Modes
 
-### About
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#64748b'}}}%%
+stateDiagram-v2
+    [*] --> Free: Default
 
-Freenove is an open-source electronics platform.
+    Free: M-Free Mode
+    Free: Manual remote control
+    Free: Full joystick access
 
-Freenove is committed to helping customers quickly realize creative ideas and product prototypes, making it easy to get started for enthusiasts of programming and electronics and launching innovative open source products.
+    Sonic: M-Sonic Mode
+    Sonic: Ultrasonic obstacle avoidance
+    Sonic: Automatic retreat & turn
 
-Our services include:
+    Line: M-Line Mode
+    Line: Infrared line following
+    Line: Auto obstacle clearing
 
-* Robot kits
-* Learning kits for Arduino, Raspberry Pi, and micro:bit
-* Electronic components and modules, tools
-* Product customization service
+    Free --> Sonic: CMD_MODE#1
+    Free --> Line: CMD_MODE#2
+    Sonic --> Free: CMD_MODE#0
+    Sonic --> Line: CMD_MODE#2
+    Line --> Free: CMD_MODE#0
+    Line --> Sonic: CMD_MODE#1
+```
 
-Our code and circuit are open source. You can obtain the details and the latest information through visiting the following website:
+---
 
-http://www.freenove.com
+## Command Protocol
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#64748b'}}}%%
+flowchart LR
+    classDef cmd fill:#6366f1,stroke:#4f46e5,stroke-width:2px,color:#ffffff
+    classDef param fill:#10b981,stroke:#059669,stroke-width:2px,color:#ffffff
+
+    subgraph Format["Command Format"]
+        direction TB
+        CMD[CMD_NAME]:::cmd
+        SEP1[#]
+        P1[param1]:::param
+        SEP2[#]
+        P2[param2]:::param
+        TERM[\n]
+    end
+
+    CMD --- SEP1 --- P1 --- SEP2 --- P2 --- TERM
+```
+
+| Command | Format | Example | Description |
+|---------|--------|---------|-------------|
+| **Motor** | `CMD_MOTOR#left#right\n` | `CMD_MOTOR#2000#2000\n` | Control wheels (-4095 to 4095) |
+| **Servo** | `CMD_SERVO#id#angle\n` | `CMD_SERVO#0#120\n` | Move servo (90-150°) |
+| **LED** | `CMD_LED#mode#R#G#B#mask\n` | `CMD_LED#1#255#0#0#15\n` | Set LED color |
+| **Mode** | `CMD_MODE#mode\n` | `CMD_MODE#1\n` | Change robot mode |
+| **Action** | `CMD_ACTION#id\n` | `CMD_ACTION#1\n` | Execute grip/release |
+
+---
+
+## Hardware Compatibility
+
+<table>
+<tr>
+<td width="50%">
+
+### PCB V1.0
+<img src="Picture/V1.0.jpg" width="100%" alt="PCB V1.0">
+
+| Component | GPIO |
+|-----------|------|
+| Servo 0/1 | 7, 8 |
+| Infrared | 16, 20, 21 |
+| LED | GPIO18 (WS281X) |
+
+**Best with: Raspberry Pi 4**
+
+</td>
+<td width="50%">
+
+### PCB V2.0
+<img src="Picture/V2.0.jpg" width="100%" alt="PCB V2.0">
+
+| Component | GPIO |
+|-----------|------|
+| Servo 0/1 | 12, 13 |
+| Infrared | 16, 26, 21 |
+| LED | GPIO10 (SPI) |
+
+**Best with: Raspberry Pi 5**
+
+</td>
+</tr>
+</table>
+
+> **Note:** RPi 5 cannot use pigpio or WS281X driver with PCB V1.0
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Tutorial.md](./Tutorial.md) | Complete assembly & usage guide with images |
+| [Communication Protocol.md](./Communication%20Protocol.md) | TCP command reference |
+| [About_Battery.md](./About_Battery.md) | Battery requirements & safety |
+| [CLAUDE.md](./CLAUDE.md) | Developer guide for contributors |
+
+---
+
+## Client Controls
+
+### Keyboard Shortcuts
+
+| Key | Action | Key | Action |
+|:---:|--------|:---:|--------|
+| `W` | Forward | `↑` | Arm Up |
+| `S` | Backward | `↓` | Arm Down |
+| `A` | Turn Left | `←` | Arm Left |
+| `D` | Turn Right | `→` | Arm Right |
+| `Space` | Stop | `Home` | Arm Home |
+| `Q` | Change Mode | `L` | LED Mode |
+| `O` | Grip Object | `P` | Drop Object |
+| `C` | Connect | `V` | Video On/Off |
+
+---
+
+## Project Structure
+
+```
+Freenove_Tank_Robot_Kit_for_Raspberry_Pi/
+├── Code/
+│   ├── Server/          # Raspberry Pi server
+│   │   ├── main.py      # Entry point
+│   │   ├── car.py       # Core logic
+│   │   ├── motor.py     # DC motor control
+│   │   ├── servo.py     # Servo control
+│   │   ├── led.py       # WS2812 LEDs
+│   │   ├── camera.py    # Video streaming
+│   │   ├── ultrasonic.py
+│   │   └── infrared.py
+│   └── Client/          # Desktop client
+│       ├── Main.py      # Entry point
+│       └── Client_Ui.py # PyQt5 UI
+├── Tutorial.md          # Full documentation
+├── Tutorial_images/     # 331 assembly images
+└── Picture/             # Product images
+```
+
+---
+
+## Support
+
+<div align="center">
+
+| | |
+|:---:|:---:|
+| **Technical Support** | [support@freenove.com](mailto:support@freenove.com) |
+| **Business Inquiries** | [sale@freenove.com](mailto:sale@freenove.com) |
+| **Store** | [store.freenove.com](http://store.freenove.com) |
+| **Website** | [www.freenove.com](http://www.freenove.com) |
+
+</div>
+
+---
+
+## License
+
+<div align="center">
+
+This project is licensed under [Creative Commons Attribution-NonCommercial-ShareAlike 3.0](http://creativecommons.org/licenses/by-nc-sa/3.0/)
+
+**Commercial use is NOT permitted**
+
+![CC BY-NC-SA 3.0](https://i-blog.csdnimg.cn/img_convert/7d756cd74076aab6d9bc50a43fd4adbf.png)
+
+Freenove brand and logo are copyright of Freenove Creative Technology Co., Ltd.
+
+</div>
+
+---
+
+<div align="center">
+
+**[Freenove](http://www.freenove.com)** - Open Source Electronics Platform
+
+*Making robotics and programming accessible to everyone*
+
+</div>
